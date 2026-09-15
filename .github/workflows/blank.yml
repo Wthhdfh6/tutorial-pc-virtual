@@ -14,22 +14,18 @@ jobs:
 
       - name: Set RDP Password
         run: |
-          net user runneradmin "RdpPass123456!"
+          net user runneradmin "RdpPassword123!"
 
       - name: Install & Connect ZeroTier
         run: |
-          $msiUrl = "https://download.zerotier.com/dist/ZeroTier%20One.msi"
-          Invoke-WebRequest -Uri $msiUrl -OutFile "ZeroTierOne.msi"
-          Start-Process msiexec.exe -ArgumentList "/i ZeroTierOne.msi /quiet /norestart" -Wait
-          Start-Sleep -Seconds 15
-          # เรียกใช้ผ่าน Path เต็มของ ZeroTier CLI
-          & "C:\Program Files (x86)\ZeroTier\One\zerotier-cli.bat" join ${{ secrets.ZEROTIER_NETWORK_ID }}
+          Invoke-WebRequest -Uri "https://download.zerotier.com/dist/zerotier_one_x64.msi" -OutFile "zerotier.msi"
+          Start-Process msiexec.exe -Wait -ArgumentList '/i zerotier.msi /qn'
+          Start-Sleep -Seconds 5
+          cd "C:\Program Files (x86)\ZeroTier\One"
+          .\zerotier-cli.bat join f3797ba7a893d11e
 
-      - name: Keep Alive RDP
+      - name: Keep Runner Alive
         run: |
-          $i = 0
-          while ($i -lt 360) {
-            Start-Sleep -Seconds 60
-            $i++
-          }
+          Write-Host "RDP and ZeroTier are ready. Press Ctrl+C to stop."
+          Start-Sleep -Seconds 21600
           
