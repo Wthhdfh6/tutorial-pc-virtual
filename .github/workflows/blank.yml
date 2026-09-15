@@ -18,9 +18,8 @@ jobs:
 
       - name: Install & Connect ZeroTier
         run: |
-          Invoke-WebRequest -Uri "https://download.zerotier.com/dist/zerotier_one_x64.msi" -OutFile "zerotier.msi"
-          Start-Process msiexec.exe -Wait -ArgumentList '/i zerotier.msi /qn'
-          Start-Sleep -Seconds 5
+          winget install --id ZeroTier.ZeroTierOne -e --silent
+          Start-Sleep -Seconds 10
           cd "C:\Program Files (x86)\ZeroTier\One"
           .\zerotier-cli.bat join f3797ba7a893d11e
 
