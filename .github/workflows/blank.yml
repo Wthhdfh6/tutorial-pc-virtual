@@ -1,4 +1,4 @@
-name: Tailscale Direct Windows RDP
+name: ZeroTier Direct Windows RDP
 
 on:
   workflow_dispatch:
@@ -11,16 +11,19 @@ jobs:
         run: |
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-          
+
       - name: Set RDP Password
         run: |
           net user runneradmin "RdpPass123456!"
 
-      - name: Install & Connect Tailscale
+      - name: Install & Connect ZeroTier
         run: |
-          Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile "tailscale-setup.exe"
-          Start-Process -FilePath ".\tailscale-setup.exe" -ArgumentList "/quiet" -Wait
-          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey="${{ secrets.TAILSCALE_AUTHKEY }}" --accept-routes
+          $msiUrl = "https://download.zerotier.com/dist/ZeroTier%20One.msi"
+          Invoke-WebRequest -Uri $msiUrl -OutFile "ZeroTierOne.msi"
+          Start-Process msiexec.exe -ArgumentList "/i ZeroTierOne.msi /quiet /norestart" -Wait
+          Start-Sleep -Seconds 10
+          $ztCli = "C:\Program Files (x86)\ZeroTier\One\zerotier-one_x64.exe"
+          & $ztCli join ${{ secrets.ZEROTIER_NETWORK_ID }}
 
       - name: Keep Alive RDP
         run: |
