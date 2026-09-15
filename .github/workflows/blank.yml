@@ -22,8 +22,7 @@ jobs:
           Invoke-WebRequest -Uri $msiUrl -OutFile "ZeroTierOne.msi"
           Start-Process msiexec.exe -ArgumentList "/i ZeroTierOne.msi /quiet /norestart" -Wait
           Start-Sleep -Seconds 10
-          $ztCli = "C:\Program Files (x86)\ZeroTier\One\zerotier-one_x64.exe"
-          & $ztCli join ${{ secrets.ZEROTIER_NETWORK_ID }}
+          zerotier-cli join ${{ secrets.ZEROTIER_NETWORK_ID }}
 
       - name: Keep Alive RDP
         run: |
