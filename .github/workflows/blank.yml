@@ -1,4 +1,4 @@
-name: ZeroTier Direct Windows RDP
+name: Tailscale Direct Windows RDP
 
 on:
   workflow_dispatch:
@@ -11,20 +11,25 @@ jobs:
         run: |
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
           Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-
+          
       - name: Set RDP Password
         run: |
-          net user runneradmin "RdpPassword123!"
+          net user runneradmin "RdpPass123456!" /add
+          net localgroup administrators runneradmin /add
 
-      - name: Install & Connect ZeroTier
+      - name: Install and Connect Tailscale
+        shell: powershell
         run: |
-          winget install --id ZeroTier.ZeroTierOne -e --silent
-          Start-Sleep -Seconds 10
-          cd "C:\Program Files (x86)\ZeroTier\One"
-          .\zerotier-cli.bat join f3797ba7a893d11e
+          Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile "tailscale.exe"
+          Start-Process -FilePath ".\tailscale.exe" -ArgumentList "/quiet" -Wait
+          & "C:\Program Files\Tailscale\tailscaled.exe" --state=mem: &
+          Start-Sleep -Seconds 3
+          & "C:\Program Files\Tailscale\tailscale.exe" up --authkey=${{ secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Keep Runner Alive
+      - name: Keep Alive RDP
         run: |
-          Write-Host "RDP and ZeroTier are ready. Press Ctrl+C to stop."
-          Start-Sleep -Seconds 21600
-          
+          $i = 0
+          while ($i -lt 360) {
+            Start-Sleep -Seconds 60
+            $i++
+          }
